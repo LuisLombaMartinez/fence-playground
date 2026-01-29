@@ -17,8 +17,12 @@ on:
       - '.github/workflows/backend-ci.yml'
 
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio-backend
+  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/fence-backend
   PYTHON_VERSION: '3.13'
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   lint-and-test:

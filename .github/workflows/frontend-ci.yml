@@ -17,8 +17,12 @@ on:
       - '.github/workflows/frontend-ci.yml'
 
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio-frontend
+  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/fence-frontend
   NODE_VERSION: '22'
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   lint-and-test:
