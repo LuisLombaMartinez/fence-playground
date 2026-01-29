@@ -134,7 +134,8 @@ jobs:
         run: |
           echo "Deploying backend:${{ github.ref_name }} to staging environment"
           echo "Image: ${{ env.DOCKER_IMAGE }}:${{ github.ref_name }}"
-          # Add actual deployment commands here (e.g., AWS ECS update-service)
+          # This is mocked deployment command
+          echo "AWS ECS update-service --cluster staging-cluster --service backend-service --image ${{ env.DOCKER_IMAGE }}:${{ github.ref_name }}"
 
   deploy-production:
     name: Deploy to Production
@@ -150,4 +151,5 @@ jobs:
         run: |
           echo "Deploying backend:latest to production environment"
           echo "Image: ${{ env.DOCKER_IMAGE }}:latest"
-          # Add actual deployment commands here (e.g., AWS ECS update-service)
+          # This is mocked deployment command
+          echo "AWS ECS update-service --cluster production-cluster --service backend-service --image ${{ env.DOCKER_IMAGE }}:latest"
