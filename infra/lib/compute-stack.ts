@@ -11,6 +11,7 @@ export interface ComputeStackProps extends cdk.StackProps {
   backendAlb: elbv2.ApplicationLoadBalancer;
   backendTargetGroup: elbv2.ApplicationTargetGroup;
   frontendTargetGroup: elbv2.ApplicationTargetGroup;
+  ecsSecurityGroup: ec2.SecurityGroup;
 }
 
 export class ComputeStack extends cdk.Stack {
@@ -23,7 +24,7 @@ export class ComputeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ComputeStackProps) {
     super(scope, id, props);
 
-    const { vpc, backendAlb, backendTargetGroup, frontendTargetGroup } = props;
+    const { vpc, backendAlb, backendTargetGroup, frontendTargetGroup, ecsSecurityGroup } = props;
 
     // ========== ECR Repositories ==========
     this.backendRepository = new ecr.Repository(this, 'BackendRepository', {
@@ -88,6 +89,7 @@ export class ComputeStack extends cdk.Stack {
       desiredCount: 1,
       assignPublicIp: false,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [ecsSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
     });
 
@@ -123,6 +125,7 @@ export class ComputeStack extends cdk.Stack {
       desiredCount: 1,
       assignPublicIp: false,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [ecsSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
     });
 

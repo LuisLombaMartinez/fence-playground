@@ -9,6 +9,9 @@ export class NetworkStack extends cdk.Stack {
   public readonly frontendAlb: elbv2.ApplicationLoadBalancer;
   public readonly backendTargetGroup: elbv2.ApplicationTargetGroup;
   public readonly frontendTargetGroup: elbv2.ApplicationTargetGroup;
+  public readonly frontendAlbSecurityGroup: ec2.SecurityGroup;
+  public readonly backendAlbSecurityGroup: ec2.SecurityGroup;
+  public readonly ecsSecurityGroup: ec2.SecurityGroup;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -36,13 +39,69 @@ export class NetworkStack extends cdk.Stack {
       destination: ec2.FlowLogDestination.toCloudWatchLogs(),
     });
 
+    // ========== Security Groups ==========
+    // Frontend ALB Security Group (Internet-facing)
+    this.frontendAlbSecurityGroup = new ec2.SecurityGroup(this, 'FrontendAlbSecurityGroup', {
+      vpc: this.vpc,
+      description: 'Security group for frontend ALB',
+      allowAllOutbound: true,
+    });
+
+    this.frontendAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'Allow HTTP from internet'
+    );
+
+    this.frontendAlbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      'Allow HTTPS from internet'
+    );
+
+    // Backend ALB Security Group (Internal)
+    this.backendAlbSecurityGroup = new ec2.SecurityGroup(this, 'BackendAlbSecurityGroup', {
+      vpc: this.vpc,
+      description: 'Security group for backend ALB (internal)',
+      allowAllOutbound: true,
+    });
+
+    // ECS Security Group
+    this.ecsSecurityGroup = new ec2.SecurityGroup(this, 'EcsSecurityGroup', {
+      vpc: this.vpc,
+      description: 'Security group for ECS tasks',
+      allowAllOutbound: true,
+    });
+
+    // Allow Frontend ALB to reach Frontend ECS tasks
+    this.ecsSecurityGroup.addIngressRule(
+      this.frontendAlbSecurityGroup,
+      ec2.Port.tcp(3000),
+      'Allow frontend ALB to reach frontend tasks'
+    );
+
+    // Allow Backend ALB to reach Backend ECS tasks
+    this.ecsSecurityGroup.addIngressRule(
+      this.backendAlbSecurityGroup,
+      ec2.Port.tcp(8000),
+      'Allow backend ALB to reach backend tasks'
+    );
+
+    // Allow Frontend ECS tasks to reach Backend ALB
+    this.backendAlbSecurityGroup.addIngressRule(
+      this.ecsSecurityGroup,
+      ec2.Port.tcp(80),
+      'Allow frontend tasks to reach backend ALB'
+    );
+
     // ========== Application Load Balancers ==========
     // Backend ALB (Internal)
     this.backendAlb = new elbv2.ApplicationLoadBalancer(this, 'BackendALB', {
       vpc: this.vpc,
-      internetFacing: false, // Internal ALB
+      internetFacing: false,
       loadBalancerName: 'portfolio-backend-alb',
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroup: this.backendAlbSecurityGroup,
     });
 
     // Frontend ALB (Internet-facing)
@@ -50,6 +109,7 @@ export class NetworkStack extends cdk.Stack {
       vpc: this.vpc,
       internetFacing: true,
       loadBalancerName: 'portfolio-frontend-alb',
+      securityGroup: this.frontendAlbSecurityGroup,
     });
 
     // ========== Target Groups ==========

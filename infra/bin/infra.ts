@@ -26,6 +26,7 @@ const computeStack = new ComputeStack(app, 'PortfolioComputeStack', {
   backendAlb: networkStack.backendAlb,
   backendTargetGroup: networkStack.backendTargetGroup,
   frontendTargetGroup: networkStack.frontendTargetGroup,
+  ecsSecurityGroup: networkStack.ecsSecurityGroup,
 });
 
 // Observability stack (CloudWatch, Alarms, Dashboard)
