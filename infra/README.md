@@ -108,22 +108,6 @@ npm run cdk synth PortfolioComputeStack
 npm run watch
 ```
 
-## Cost Optimization
-
-The infrastructure is configured for cost efficiency:
-- **Single NAT Gateway** instead of one per AZ (~$32/month savings)
-- **Fargate Spot** can be enabled for non-production (~70% cheaper)
-- **1 task minimum** with auto-scaling to 4
-- **Environment-based log retention**: 7 days (dev/staging), 30 days (production)
-
-### Estimated Monthly Cost (us-east-1)
-- NAT Gateway: ~$32
-- Dual ALBs: ~$32
-- ECS Fargate (2 tasks): ~$15
-- CloudWatch Logs: ~$5
-- CloudWatch Alarms & Dashboard: ~$21
-- **Total: ~$105/month**
-
 ## Stack Structure
 
 - **PortfolioNetworkStack**: VPC, subnets, security groups, NAT gateway, dual ALBs, target groups
