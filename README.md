@@ -256,3 +256,11 @@ docker compose logs -f
 # Stop services
 docker compose down
 ```
+
+## Possible improvements
+
+Had I had more time to play around with the project, the next steps would have been to properly set up a local testing environment for the infra stack. Tools such as DevContainers(https://containers.dev/) and LocalStack(https://docs.localstack.cloud/) serve to develop Cloud Infrastructure locally, allowing for faster development loops and better testing.
+
+Other improvement would be using all the power that a programming language provides for setting up the infra. It would be a good idea to define classes and methods for both the Frontend and Backend services, that can be reusable for any new service that may arise.
+
+Regarding costs, the project could also use some improvements such as implementing FARGATE_SPOT for non-production environments, as well as been more optimistic with alerting, logging and monitoring limits. 
