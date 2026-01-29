@@ -1,0 +1,78 @@
+services:
+  # -------------------------
+  # Frontend Application
+  # -------------------------
+  frontend-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://backend-nginx
+    expose:
+      - "3000"
+    depends_on:
+      backend-nginx:
+        condition: service_healthy
+    networks:
+      - frontend-net
+      - backend-net
+
+  # -------------------------
+  # Frontend Nginx (Public Edge)
+  # -------------------------
+  frontend-nginx:
+    build:
+      context: ./frontend/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend-app
+    networks:
+      - frontend-net
+
+  # -------------------------
+  # Backend Application
+  # -------------------------
+  backend-app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend-net
+
+  # -------------------------
+  # Backend Nginx (Internal Gateway)
+  # -------------------------
+  backend-nginx:
+    build:
+      context: ./backend/nginx
+      dockerfile: Dockerfile
+    expose:
+      - "80"
+    depends_on:
+      backend-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend-net
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge

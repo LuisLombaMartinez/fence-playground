@@ -1,8 +1,11 @@
 import { InsightsPanel } from './components/InsightsPanel';
 import { AssetsTable } from './components/AssetsTable';
 
+// Use API_URL for server-side fetches, fallback to NEXT_PUBLIC_API_URL for client-side
+const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+
 async function getAssets() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assets`, {
+  const res = await fetch(`${API_URL}/assets`, {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error('Failed to fetch assets');
@@ -10,7 +13,7 @@ async function getAssets() {
 }
 
 async function getInsights() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/insights`, {
+  const res = await fetch(`${API_URL}/insights`, {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error('Failed to fetch insights');
